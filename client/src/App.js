@@ -1,13 +1,16 @@
-import { BrowserRouter as Router,Routes, Route, Link } from 'react-router-dom';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// import logo from "./logo.svg";
+import "./App.css";
 
-import Home from "./components/Home"
+import { Form } from "./pages/Form";
+import { Home } from "./pages/Home";
+import { LoginRegister } from "./pages/LoginRegister";
+import { Admin } from "./pages/Admin";
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
+      {/* <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.js</code> and save to reload.
@@ -20,10 +23,14 @@ function App() {
         >
           Learn React
         </a>
-      </header>
+      </header> */}
       <Router>
         <Routes>
-          <Route exact path='/' element={<Home/>}></Route>
+          <Route exact path="/" element={<Home />}></Route>
+          <Route exact path="/form" element={<Form />}></Route>
+          <Route exact path="/admin" element={<Admin />}></Route>
+          <Route exact path="/login" element={<LoginRegister />}></Route>
+
           <Route></Route>
         </Routes>
       </Router>
