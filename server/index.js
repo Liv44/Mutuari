@@ -94,6 +94,7 @@ app.get("/users/:id/borrow", function (req, res) {
   );
 });
 
+//Ajouter un nouvel utilisateur
 app.post("/adduser", function (req, res) {
   const { firstname, lastname, email, password } = req.body;
   if (firstname === "" || lastname === "" || email === "" || password === "") {
@@ -132,6 +133,42 @@ app.post("/adduser", function (req, res) {
       }
     }
   );
+});
+
+//Se connecter
+app.post("/login", function (req, res) {
+  const { email, password } = req.body;
+
+  //Vérification des champs remplis
+  if (email === "" || password === "") {
+    res.send("Error : Missing parameters");
+  } else {
+    //Vérification de l'email
+    db.all(
+      "SELECT email, passwordhashed FROM user WHERE email=?",
+      email,
+      function (err, result) {
+        if (err) throw err;
+        if (result.length > 0) {
+          //Vérification du mot de passe
+          bcrypt.compare(
+            password,
+            result[0].passwordhashed,
+            function (err, result) {
+              if (err) throw err;
+              if (result === true) {
+                res.send("Connected");
+              } else {
+                res.send("Wrong password");
+              }
+            }
+          );
+        } else {
+          res.send("User not found");
+        }
+      }
+    );
+  }
 });
 
 app.listen(PORT, () => {
