@@ -1,5 +1,6 @@
 const express = require("express");
-const sqlite3 = require("sqlite3");
+const sqlite3 = require("sqlite3").verbose();
+var bcrypt = require("bcryptjs");
 
 const dbname = "database.db";
 //Ouvertue de la base de données
@@ -22,14 +23,13 @@ db.serialize(() => {
 });
 
 const app = express();
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: false }));
 const PORT = process.env.PORT || 3001;
 app.get("/api", (req, res) => {
   res.json({ message: "Hello World!" });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server listening on ${PORT}`);
-});
 app.get("/users", function (req, res) {
   db.all(
     "SELECT id, firstname, lastname, email, isAdmin FROM user",
@@ -71,6 +71,71 @@ app.get("/users/:id", function (req, res) {
       res.send(result);
     }
   );
+});
+app.get("/users/:id/borrow", function (req, res) {
+  db.all(
+    "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id =borrow.userID WHERE user.id = ?",
+    req.params.id,
+    function (err, result) {
+      if (err) throw err;
+      res.send(result);
+    }
+  );
+});
+
+app.get("/users/:id/borrow", function (req, res) {
+  db.all(
+    "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id =borrow.userID WHERE user.id = ?",
+    req.params.id,
+    function (err, result) {
+      if (err) throw err;
+      res.send(result);
+    }
+  );
+});
+
+app.post("/adduser", function (req, res) {
+  const { firstname, lastname, email, password } = req.body;
+  if (firstname === "" || lastname === "" || email === "" || password === "") {
+    res.send("Error : Missing parameters");
+    return 1;
+  }
+  // Vérification du format de l'email
+  const regex = new RegExp("@ynov.com$");
+  if (!regex.test(email)) {
+    res.send("Format de l'email à revoir.");
+    return 1;
+  }
+
+  // Vérification de l'unicité de l'email
+  db.all(
+    "SELECT id, firstname, lastname, email, isAdmin FROM user WHERE email = ?",
+    email,
+    function (err, result) {
+      if (err) throw err;
+      if (result.length > 0) {
+        res.send("User already exists");
+      } else {
+        //Vérification du mot de passe
+        // const strongRegex = new RegExp(
+        //   "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})"
+        //   // by- Nic Raboy
+        // );
+        // Cryptage du mot de passe
+        const salt = bcrypt.genSaltSync(10);
+        const hashedPassword = bcrypt.hashSync(password, salt);
+        db.run(
+          "INSERT INTO user (firstname, lastname, email, passwordhashed) VALUES (?, ?, ?, ?)",
+          [firstname, lastname, email, hashedPassword]
+        );
+        res.send("User added");
+      }
+    }
+  );
+});
+
+app.listen(PORT, () => {
+  console.log(`Server listening on ${PORT}`);
 });
 // db.close((err) => {
 //   if (err) throw err;
