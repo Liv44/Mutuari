@@ -6,10 +6,11 @@ import { Form } from "./pages/Form";
 import { Home } from "./pages/Home";
 import { LoginRegister } from "./pages/LoginRegister";
 import { Admin } from "./pages/Admin";
+import { Box } from "@chakra-ui/react";
 
 function App() {
   return (
-    <div className="App">
+    <Box backgroundColor="#FFF5F8" className="App" width="100%" height="100vh">
       {/* <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
@@ -34,7 +35,7 @@ function App() {
           <Route></Route>
         </Routes>
       </Router>
-    </div>
+    </Box>
   );
 }
 

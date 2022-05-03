@@ -23,8 +23,8 @@ db.serialize(() => {
 });
 
 const app = express();
-app.use(express.static("public"));
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
 const PORT = process.env.PORT || 3001;
 app.get("/api", (req, res) => {
   res.json({ message: "Hello World!" });
@@ -141,15 +141,17 @@ app.post("/login", function (req, res) {
 
   //Vérification des champs remplis
   if (email === "" || password === "") {
-    res.send("Error : Missing parameters");
+    res.send({ connected: false, err: "User not found" });
   } else {
     //Vérification de l'email
     db.all(
-      "SELECT email, passwordhashed FROM user WHERE email=?",
+      "SELECT email, passwordhashed, isAdmin FROM user WHERE email=?",
       email,
       function (err, result) {
         if (err) throw err;
         if (result.length > 0) {
+          const isAdmin = result[0].isAdmin;
+
           //Vérification du mot de passe
           bcrypt.compare(
             password,
@@ -157,14 +159,14 @@ app.post("/login", function (req, res) {
             function (err, result) {
               if (err) throw err;
               if (result === true) {
-                res.send("Connected");
+                res.send({ connected: true, isAdmin: isAdmin });
               } else {
-                res.send("Wrong password");
+                res.send({ connected: false, err: "password" });
               }
             }
           );
         } else {
-          res.send("User not found");
+          res.send({ connected: false, err: "user" });
         }
       }
     );
