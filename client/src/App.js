@@ -4,7 +4,7 @@ import "./App.css";
 
 import { Form } from "./pages/Form";
 import { Home } from "./pages/Home";
-import { LoginRegister } from "./pages/LoginRegister";
+import { Register } from "./pages/Register";
 import { Admin } from "./pages/Admin";
 import { Box } from "@chakra-ui/react";
 
@@ -30,7 +30,7 @@ function App() {
           <Route exact path="/" element={<Home />}></Route>
           <Route exact path="/form" element={<Form />}></Route>
           <Route exact path="/admin" element={<Admin />}></Route>
-          <Route exact path="/login" element={<LoginRegister />}></Route>
+          <Route exact path="/register" element={<Register />}></Route>
 
           <Route></Route>
         </Routes>

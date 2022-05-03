@@ -98,13 +98,13 @@ app.get("/users/:id/borrow", function (req, res) {
 app.post("/adduser", function (req, res) {
   const { firstname, lastname, email, password } = req.body;
   if (firstname === "" || lastname === "" || email === "" || password === "") {
-    res.send("Error : Missing parameters");
+    res.send({ added: false, err: "params" });
     return 1;
   }
   // Vérification du format de l'email
   const regex = new RegExp("@ynov.com$");
   if (!regex.test(email)) {
-    res.send("Format de l'email à revoir.");
+    res.send({ added: false, err: "format" });
     return 1;
   }
 
@@ -115,13 +115,8 @@ app.post("/adduser", function (req, res) {
     function (err, result) {
       if (err) throw err;
       if (result.length > 0) {
-        res.send("User already exists");
+        res.send({ added: false, err: "user" });
       } else {
-        //Vérification du mot de passe
-        // const strongRegex = new RegExp(
-        //   "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})"
-        //   // by- Nic Raboy
-        // );
         // Cryptage du mot de passe
         const salt = bcrypt.genSaltSync(10);
         const hashedPassword = bcrypt.hashSync(password, salt);
@@ -129,7 +124,7 @@ app.post("/adduser", function (req, res) {
           "INSERT INTO user (firstname, lastname, email, passwordhashed) VALUES (?, ?, ?, ?)",
           [firstname, lastname, email, hashedPassword]
         );
-        res.send("User added");
+        res.send({ added: true });
       }
     }
   );

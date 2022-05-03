@@ -23,10 +23,7 @@ export const Form = () => {
     setErrorMail(true);
     setErrorPassword(true);
 
-    console.log(event);
     axios.post("/login", { email: email, password: password }).then((res) => {
-      console.log(res);
-      console.log(res.data);
       if (res.data.connected === true) {
         if (res.data.isAdmin) {
           window.location.href = "/admin";
@@ -87,7 +84,7 @@ export const Form = () => {
 
           <FormHelperText>
             Pas encore de compte ? Inscrivez-vous{" "}
-            <Link href="/login" color="purple">
+            <Link href="/register" color="purple">
               ici
             </Link>
           </FormHelperText>
