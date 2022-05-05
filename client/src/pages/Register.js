@@ -1,9 +1,9 @@
-import { Box, Image, Heading } from "@chakra-ui/react";
-import React from "react";
+import { Box, Heading, Image } from "@chakra-ui/react";
 import logoMutuari from "../logoMutuari.svg";
-import { Form } from "../components/connexion/Form";
+import React from "react";
+import { Form } from "../components/register/Form";
 
-export const Home = () => {
+export const Register = () => {
   return (
     <Box
       display="flex"
