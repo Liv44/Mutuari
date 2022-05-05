@@ -72,9 +72,9 @@ app.get("/users/:id", function (req, res) {
     }
   );
 });
-app.get("/users/:id/borrow", function (req, res) {
+app.get("/users/:id/borrow/validated", function (req, res) {
   db.all(
-    "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id =borrow.userID WHERE user.id = ?",
+    "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id =borrow.userID WHERE user.id = ? AND borrow.isValidated = true",
     req.params.id,
     function (err, result) {
       if (err) throw err;
@@ -82,10 +82,9 @@ app.get("/users/:id/borrow", function (req, res) {
     }
   );
 });
-
 app.get("/users/:id/borrow", function (req, res) {
   db.all(
-    "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id =borrow.userID WHERE user.id = ?",
+    "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id =borrow.userID WHERE user.id = ? AND borrow.isValidated = false",
     req.params.id,
     function (err, result) {
       if (err) throw err;
