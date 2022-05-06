@@ -104,11 +104,27 @@ app.get("/materials/:id/borrow/:startdate/:enddate", function (req, res) {
     req.params.id,
     function (err, result) {
       if (err) throw err;
-      // ICI regarder les dispos du matériel
-      console.log(result[0].startDate, req.params.startdate);
-      console.log(req.params.enddate);
-
-      res.send(result);
+      const startDate = new Date(req.params.startdate);
+      const endDate = new Date(req.params.enddate);
+      let disponibility = true;
+      for (let i = 0; i < result.length; i++) {
+        const startDateMat = new Date(result[i].startDate);
+        const endDateMat = new Date(result[i].endDate);
+        if (startDateMat < startDate && endDateMat >= startDate) {
+          disponibility = false;
+          break;
+        } else if (startDateMat <= endDate && endDateMat > endDate) {
+          disponibility = false;
+          break;
+        } else if (startDateMat <= startDate && endDateMat >= endDate) {
+          disponibility = false;
+          break;
+        } else if (startDateMat >= startDate && endDateMat <= endDate) {
+          disponibility = false;
+          break;
+        }
+      }
+      res.send(disponibility);
     }
   );
 });
