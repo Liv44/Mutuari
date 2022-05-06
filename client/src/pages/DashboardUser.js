@@ -1,9 +1,10 @@
-import { Box, Heading, Image } from "@chakra-ui/react";
+import { Box, Flex, Heading, VStack, Image } from "@chakra-ui/react";
 import React from "react";
 import logoMutuari from "../logoMutuari.svg";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { TableCustom } from "../components/utils/TableCustom";
+import { Form } from "../components/dashboardUser/Form";
 
 export const DashboardUser = () => {
   const [materials, setMaterials] = useState([]);
@@ -23,16 +24,21 @@ export const DashboardUser = () => {
         <Image src={logoMutuari}></Image>
       </Box>
       <Heading mb={5}>Dashboard User</Heading>
-      <TableCustom
-        materials={materials}
-        admin={false}
-        title="Emprunts validés"
-      ></TableCustom>
-      <TableCustom
-        materials={materialsnotvalidated}
-        admin={false}
-        title="Emprunts non validés"
-      ></TableCustom>
+      <Flex justifyContent="space-around">
+        <VStack>
+          <TableCustom
+            materials={materials}
+            admin={false}
+            title="Emprunts validés"
+          ></TableCustom>
+          <TableCustom
+            materials={materialsnotvalidated}
+            admin={false}
+            title="Emprunts non validés"
+          ></TableCustom>
+        </VStack>
+        <Form></Form>
+      </Flex>
     </Box>
   );
 };

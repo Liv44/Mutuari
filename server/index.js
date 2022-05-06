@@ -72,6 +72,8 @@ app.get("/users/:id", function (req, res) {
     }
   );
 });
+
+//Sélection de tous les emprunts validés d'un utilisateur
 app.get("/users/:id/borrow/validated", function (req, res) {
   db.all(
     "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id =borrow.userID WHERE user.id = ? AND borrow.isValidated = true",
@@ -82,12 +84,30 @@ app.get("/users/:id/borrow/validated", function (req, res) {
     }
   );
 });
+
+//Sélection de tous les emprunts non validés d'un utilisateur
 app.get("/users/:id/borrow", function (req, res) {
   db.all(
     "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id =borrow.userID WHERE user.id = ? AND borrow.isValidated = false",
     req.params.id,
     function (err, result) {
       if (err) throw err;
+      res.send(result);
+    }
+  );
+});
+
+//
+app.get("/materials/:id/borrow/:startdate/:enddate", function (req, res) {
+  db.all(
+    "SELECT materialID, startDate, endDate FROM borrow WHERE materialID = ?",
+    req.params.id,
+    function (err, result) {
+      if (err) throw err;
+      // ICI regarder les dispos du matériel
+      console.log(result[0].startDate, req.params.startdate);
+      console.log(req.params.enddate);
+
       res.send(result);
     }
   );
