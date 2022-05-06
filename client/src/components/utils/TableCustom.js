@@ -35,11 +35,11 @@ export const TableCustom = ({ materials, title, admin, buttons }) => {
           </Tr>
         </Thead>
         <Tbody>
-          {materials.map((material) => {
+          {materials.map((material, index) => {
             const startDate = material.startDate;
             getDateString(startDate);
             return (
-              <Tr>
+              <Tr key={index}>
                 <Td fontWeight="semibold">{material.name}</Td>
                 {admin ? (
                   <Td fontWeight="semibold">

@@ -24,7 +24,7 @@ export const DashboardUser = () => {
         <Image src={logoMutuari}></Image>
       </Box>
       <Heading mb={5}>Dashboard User</Heading>
-      <Flex justifyContent="space-around">
+      <Flex justifyContent="space-around" alignItems="flex-start">
         <VStack>
           <TableCustom
             materials={materials}

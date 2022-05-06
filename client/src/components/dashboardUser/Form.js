@@ -4,51 +4,58 @@ import {
   Input,
   Box,
   FormLabel,
-  FormHelperText,
   FormErrorMessage,
   Heading,
   Select,
   Flex,
 } from "@chakra-ui/react";
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 export const Form = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [isErrorDate, setErrorDate] = useState(true);
+  const [isErrorDate, setErrorDate] = useState(false);
   const [materials, setMaterials] = useState([]);
+  const [materialID, setMaterialID] = useState("");
+  const [disponibility, setDisponibility] = useState(true);
+  const [notAvailable, setAvailable] = useState(false);
+
   useEffect(() => {
     axios.get("/materials").then((res) => {
       setMaterials(res.data);
     });
-  }, []);
+  }, [materials]);
   const handleSubmit = (event) => {
     setErrorDate(true);
-    // axios
-    //   .post("/login", { startDate: startDate, endDate: endDate })
-    //   .then((res) => {});
     event.preventDefault();
   };
-  const CheckMaterial = (e) => {
-    const materialID = e.target.value;
-    if (startDate === "" || endDate === "") {
+  useEffect(() => {
+    if (endDate < startDate && endDate !== "") {
+      setErrorDate(true);
+    } else if (endDate !== "" || startDate !== "") {
       setErrorDate(false);
+      axios
+        .get(
+          "/materials/" + materialID + "/borrow/" + startDate + "/" + endDate
+        )
+        .then((res) => {
+          setDisponibility(res.data.disponibility);
+        });
     }
-    console.log(
-      "/materials/" +
-        materialID +
-        '/borrow/"' +
-        startDate +
-        '"/"' +
-        endDate +
-        '"'
-    );
-    axios.get("/materials/" + materialID + "/borrow").then((res) => {
-      console.log(res.data);
-    });
-  };
+    if (disponibility === false && isErrorDate === false) {
+      setAvailable(true);
+    } else {
+      setAvailable(false);
+    }
+  }, [
+    materialID,
+    startDate,
+    endDate,
+    disponibility,
+    isErrorDate,
+    notAvailable,
+  ]);
 
   return (
     <Box
@@ -57,14 +64,13 @@ export const Form = () => {
       borderRadius="30px"
       padding={10}
       backgroundColor="white"
-      overflow="hidden"
     >
       <Heading as="h3" size="lg" textAlign="left" mb={5}>
         Emprunter un matérial
       </Heading>
       <form onSubmit={handleSubmit} method="POST">
         <Flex>
-          <FormControl mb={5}>
+          <FormControl mr={5}>
             <FormLabel>Date d'emprunt</FormLabel>
             <Input
               isRequired
@@ -72,29 +78,36 @@ export const Form = () => {
               placeholder="Date d'emprunt"
               value={startDate}
               name="startDate"
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+              }}
             />
-            <FormErrorMessage>
-              La date d'emprunt ne peut pas être avant la date de retour.
-            </FormErrorMessage>
           </FormControl>
-          <FormControl mb={5} isInvalid={!isErrorDate}>
+          <FormControl>
             <FormLabel>Date de retour</FormLabel>
             <Input
-              isRequired
               type="date"
               placeholder="Date de retour"
               value={endDate}
               name="endDate"
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+              }}
             />
-            <FormErrorMessage>
-              La date d'emprunt ne peut pas être avant la date de retour.
-            </FormErrorMessage>
           </FormControl>
         </Flex>
-        <FormControl>
-          <Select onChange={CheckMaterial}>
+        <FormControl mb={5} isInvalid={isErrorDate}>
+          <FormErrorMessage color="red">
+            La date d'emprunt doit être avant la date de retour.
+          </FormErrorMessage>
+        </FormControl>
+        <FormControl mb={5} isInvalid={notAvailable}>
+          <Select
+            onChange={(e) => {
+              setMaterialID(e.target.value);
+            }}
+            value={materialID}
+          >
             <option value="">Choisir un matériel</option>
             {materials.map((material) => (
               <option key={material.id} value={material.id}>
@@ -102,12 +115,33 @@ export const Form = () => {
               </option>
             ))}
           </Select>
-          <FormHelperText textAlign="left">
-            Si le matériel que vous cherchez n'est pas dans la liste, c'est
-            qu'il n'est pas disponible pour les dates sélectionnées.
-          </FormHelperText>
+          <FormErrorMessage color="red">
+            Ce matériel n'est pas disponible aux dates entrées.
+          </FormErrorMessage>
         </FormControl>
-        <Button type="submit">Valider</Button>
+        <FormControl>
+          <Button
+            color="white"
+            backgroundColor="darkpurple"
+            type="submit"
+            isDisabled={!disponibility}
+            _hover={
+              disponibility
+                ? {
+                    backgroundColor: "white",
+                    color: "purple",
+                    borderColor: "purple",
+                    border: "2px",
+                  }
+                : {}
+            }
+            _focus={{
+              boxShadow: "none",
+            }}
+          >
+            Valider l'emprunt
+          </Button>
+        </FormControl>
       </form>
     </Box>
   );
