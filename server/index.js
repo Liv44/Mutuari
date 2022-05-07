@@ -72,9 +72,11 @@ app.get("/users/:id", function (req, res) {
     }
   );
 });
-app.get("/users/:id/borrow", function (req, res) {
+
+//Sélection de tous les emprunts validés d'un utilisateur
+app.get("/users/:id/borrow/validated", function (req, res) {
   db.all(
-    "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id =borrow.userID WHERE user.id = ?",
+    "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id =borrow.userID WHERE user.id = ? AND borrow.isValidated = true",
     req.params.id,
     function (err, result) {
       if (err) throw err;
@@ -83,9 +85,10 @@ app.get("/users/:id/borrow", function (req, res) {
   );
 });
 
+//Sélection de tous les emprunts non validés d'un utilisateur
 app.get("/users/:id/borrow", function (req, res) {
   db.all(
-    "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id =borrow.userID WHERE user.id = ?",
+    "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id =borrow.userID WHERE user.id = ? AND borrow.isValidated = false",
     req.params.id,
     function (err, result) {
       if (err) throw err;
@@ -94,9 +97,84 @@ app.get("/users/:id/borrow", function (req, res) {
   );
 });
 
+//
+app.get("/materials/:id/borrow/:startdate/:enddate", function (req, res) {
+  db.all(
+    "SELECT materialID, startDate, endDate FROM borrow WHERE materialID = ?",
+    req.params.id,
+    function (err, result) {
+      if (err) throw err;
+      const startDate = new Date(req.params.startdate);
+      const endDate = new Date(req.params.enddate);
+      let disponibility = true;
+      for (let i = 0; i < result.length; i++) {
+        const startDateMat = new Date(result[i].startDate);
+        const endDateMat = new Date(result[i].endDate);
+        if (startDateMat < startDate && endDateMat >= startDate) {
+          disponibility = false;
+          break;
+        } else if (startDateMat <= endDate && endDateMat > endDate) {
+          disponibility = false;
+          break;
+        } else if (startDateMat <= startDate && endDateMat >= endDate) {
+          disponibility = false;
+          break;
+        } else if (startDateMat >= startDate && endDateMat <= endDate) {
+          disponibility = false;
+          break;
+        }
+      }
+      res.send({ disponibility: disponibility });
+    }
+  );
+});
+
+app.post("/newborrow", function (req, res) {
+  const { materialID, userID, startDate, endDate } = req.body;
+  db.all(
+    "SELECT materialID, startDate, endDate FROM borrow WHERE materialID = ?",
+    materialID,
+    function (err, result) {
+      if (err) throw err;
+      let disponibility = true;
+      for (let i = 0; i < result.length; i++) {
+        const startDateReq = new Date(startDate);
+        const endDateReq = new Date(endDate);
+        const startDateMat = new Date(result[i].startDate);
+        const endDateMat = new Date(result[i].endDate);
+        if (startDateMat < startDateReq && endDateMat >= startDateReq) {
+          disponibility = false;
+          break;
+        } else if (startDateMat <= endDateReq && endDateMat > endDateReq) {
+          disponibility = false;
+          break;
+        } else if (startDateMat <= startDateReq && endDateMat >= endDateReq) {
+          disponibility = false;
+          break;
+        } else if (startDateMat >= startDateReq && endDateMat <= endDateReq) {
+          disponibility = false;
+          break;
+        }
+      }
+      if (disponibility) {
+        db.run(
+          "INSERT INTO borrow(materialID, userID, startDate, endDate) VALUES (?, ?, ?, ?)",
+          [materialID, userID, startDate, endDate],
+          function (err, result) {
+            if (err) throw err;
+            res.send({ added: true, result: result });
+          }
+        );
+      } else {
+        res.send({ added: disponibility });
+      }
+    }
+  );
+});
 //Ajouter un nouvel utilisateur
 app.post("/adduser", function (req, res) {
   const { firstname, lastname, email, password } = req.body;
+  console.log(req.body);
   if (firstname === "" || lastname === "" || email === "" || password === "") {
     res.send({ added: false, err: "params" });
     return 1;
