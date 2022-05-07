@@ -27,13 +27,27 @@ export const Form = () => {
     });
   }, [materials]);
   const handleSubmit = (event) => {
-    setErrorDate(true);
+    const userID = 3;
+    axios
+      .post("/newborrow", { materialID, userID, startDate, endDate })
+      .then((res) => {
+        if (res.data.added) {
+          alert("L'emprunt a bien été enregistré.");
+          window.location.reload(true);
+        } else {
+          alert("Il y a eu un problème lors de l'enregistrement de l'emprunt.");
+        }
+      });
     event.preventDefault();
   };
   useEffect(() => {
     if (endDate < startDate && endDate !== "") {
       setErrorDate(true);
-    } else if (endDate !== "" || startDate !== "") {
+    } else if (
+      endDate.length !== 0 &&
+      startDate.length !== 0 &&
+      materialID.length !== 0
+    ) {
       setErrorDate(false);
       axios
         .get(

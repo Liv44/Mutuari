@@ -124,14 +124,57 @@ app.get("/materials/:id/borrow/:startdate/:enddate", function (req, res) {
           break;
         }
       }
-      res.send(disponibility);
+      res.send({ disponibility: disponibility });
     }
   );
 });
 
+app.post("/newborrow", function (req, res) {
+  const { materialID, userID, startDate, endDate } = req.body;
+  db.all(
+    "SELECT materialID, startDate, endDate FROM borrow WHERE materialID = ?",
+    materialID,
+    function (err, result) {
+      if (err) throw err;
+      let disponibility = true;
+      for (let i = 0; i < result.length; i++) {
+        const startDateReq = new Date(startDate);
+        const endDateReq = new Date(endDate);
+        const startDateMat = new Date(result[i].startDate);
+        const endDateMat = new Date(result[i].endDate);
+        if (startDateMat < startDateReq && endDateMat >= startDateReq) {
+          disponibility = false;
+          break;
+        } else if (startDateMat <= endDateReq && endDateMat > endDateReq) {
+          disponibility = false;
+          break;
+        } else if (startDateMat <= startDateReq && endDateMat >= endDateReq) {
+          disponibility = false;
+          break;
+        } else if (startDateMat >= startDateReq && endDateMat <= endDateReq) {
+          disponibility = false;
+          break;
+        }
+      }
+      if (disponibility) {
+        db.run(
+          "INSERT INTO borrow(materialID, userID, startDate, endDate) VALUES (?, ?, ?, ?)",
+          [materialID, userID, startDate, endDate],
+          function (err, result) {
+            if (err) throw err;
+            res.send({ added: true, result: result });
+          }
+        );
+      } else {
+        res.send({ added: disponibility });
+      }
+    }
+  );
+});
 //Ajouter un nouvel utilisateur
 app.post("/adduser", function (req, res) {
   const { firstname, lastname, email, password } = req.body;
+  console.log(req.body);
   if (firstname === "" || lastname === "" || email === "" || password === "") {
     res.send({ added: false, err: "params" });
     return 1;
