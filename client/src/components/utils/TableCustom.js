@@ -12,14 +12,18 @@ import React from "react";
 import { getDateString } from "../../utils";
 
 export const TableCustom = ({ materials, title, admin, buttons }) => {
+  const materialsSorted = materials.sort(
+    (a, b) => new Date(a.startDate) - new Date(b.startDate)
+  );
   return (
     <Box
       boxShadow="xl"
       borderRadius="30px"
+      overflow="scroll"
       mb={5}
       boxSize="2xl"
       backgroundColor="white"
-      height="100%"
+      maxHeight="250px"
       p={5}
     >
       <Heading as="h4" size="md" textAlign="left" mb={5}>
@@ -35,7 +39,7 @@ export const TableCustom = ({ materials, title, admin, buttons }) => {
           </Tr>
         </Thead>
         <Tbody>
-          {materials.map((material, index) => {
+          {materialsSorted.map((material, index) => {
             const startDate = material.startDate;
             getDateString(startDate);
             return (
