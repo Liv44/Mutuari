@@ -17,7 +17,7 @@ db.serialize(() => {
     "CREATE TABLE IF NOT EXISTS user ( id integer NOT NULL  PRIMARY KEY  AUTOINCREMENT, isAdmin  boolean NOT NULL DEFAULT false, firstname text NOT NULL, lastname text NOT NULL, email text NOT NULL, passwordhashed text NOT NULL);"
   );
   db.run(
-    "CREATE TABLE IF NOT EXISTS borrow (  isValidated boolean NOT NULL DEFAULT false, userID integer NOT NULL, materialID integer NOT NULL, startDate date NOT NULL, endDate date NOT NULL, FOREIGN KEY ( userID ) REFERENCES user( id ) ON DELETE CASCADE ON UPDATE CASCADE, FOREIGN KEY ( materialID ) REFERENCES material( id ) ON DELETE CASCADE ON UPDATE CASCADE );"
+    "CREATE TABLE IF NOT EXISTS borrow (  id integer NOT NULL  PRIMARY KEY  AUTOINCREMENT, isRefused boolean NOT NULL DEFAULT false, isValidated boolean NOT NULL DEFAULT false, isBorrowed boolean NOT NULL DEFAULT false, isReturned boolean NOT NULL DEFAULT false, userID integer NOT NULL, materialID integer NOT NULL, startDate date NOT NULL, endDate date NOT NULL, FOREIGN KEY ( userID ) REFERENCES user( id ) ON DELETE CASCADE ON UPDATE CASCADE, FOREIGN KEY ( materialID ) REFERENCES material( id ) ON DELETE CASCADE ON UPDATE CASCADE );"
   );
   console.log("Tables created");
 });
@@ -52,6 +52,67 @@ app.get("/borrow", function (req, res) {
     res.send(result);
   });
 });
+//Va chercher tous les emprunts validés par l'admin
+app.get("/borrow/validated", function (req, res) {
+  db.all(
+    "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE isValidated = true",
+    function (err, result) {
+      if (err) throw err;
+      res.send(result);
+    }
+  );
+});
+//Va chercher tous les emprunts À VALIDER par l'admin
+app.get("/borrow/tovalidate", function (req, res) {
+  db.all(
+    "SELECT borrow.id, material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE isValidated = false AND isRefused=false",
+    function (err, result) {
+      if (err) throw err;
+      res.send(result);
+    }
+  );
+});
+
+//Va chercher tous les emprunts REFUSÉS par l'admin
+app.get("/borrow/refused", function (req, res) {
+  db.all(
+    "SELECT borrow.id, material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE isRefused=true",
+    function (err, result) {
+      if (err) throw err;
+      res.send(result);
+    }
+  );
+});
+
+//Modification du statut de validation de l'emprunt (isValidated ou isRefused)
+app.put("/borrow/validation", function (req, res) {
+  //Plus tard, ajouter une vérification de l'ID de l'admin
+  //pour qu'il n'y ait que lui qui puisse modifier le statut de validation
+
+  const { choice, borrowID } = req.body;
+  if (choice == true) {
+    //On met isValidated à true
+    db.run(
+      "UPDATE borrow SET isValidated = true WHERE id = ?",
+      borrowID,
+      function (err, result) {
+        if (err) throw err;
+        res.send({ validation: true });
+      }
+    );
+  } else if (choice == false) {
+    //On met isRefused à true
+    db.run(
+      "UPDATE borrow SET isRefused = true WHERE id = ?",
+      borrowID,
+      function (err, result) {
+        if (err) throw err;
+        res.send({ rejection: true });
+      }
+    );
+  }
+});
+
 app.get("/materials/:id", function (req, res) {
   db.get(
     "SELECT * FROM material WHERE id = ?",
@@ -88,7 +149,7 @@ app.get("/users/:id/borrow/validated", function (req, res) {
 //Sélection de tous les emprunts non validés d'un utilisateur
 app.get("/users/:id/borrow", function (req, res) {
   db.all(
-    "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id =borrow.userID WHERE user.id = ? AND borrow.isValidated = false",
+    "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE user.id = ? AND borrow.isValidated = false",
     req.params.id,
     function (err, result) {
       if (err) throw err;
@@ -174,7 +235,6 @@ app.post("/newborrow", function (req, res) {
 //Ajouter un nouvel utilisateur
 app.post("/adduser", function (req, res) {
   const { firstname, lastname, email, password } = req.body;
-  console.log(req.body);
   if (firstname === "" || lastname === "" || email === "" || password === "") {
     res.send({ added: false, err: "params" });
     return 1;
