@@ -7,6 +7,7 @@ import { Home } from "./pages/Home";
 import { Register } from "./pages/Register";
 import { Admin } from "./pages/Admin";
 import { DashboardUser } from "./pages/DashboardUser";
+import { AdminCalendar } from "./pages/AdminCalendar";
 
 import { Box } from "@chakra-ui/react";
 import { AllReservations } from "./pages/admin/AllReservations";
@@ -40,6 +41,7 @@ function App() {
           <Route exact path="/user" element={<DashboardUser />}></Route>
           <Route exact path="/form" element={<Form />}></Route>
           <Route exact path="/admin" element={<Admin />}></Route>
+          <Route exact path="/admin/calendar" element={<AdminCalendar />}></Route>
           <Route exact path="/register" element={<Register />}></Route>
           <Route
             exact
