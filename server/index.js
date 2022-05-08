@@ -80,6 +80,13 @@ app.get("/borrow", function (req, res) {
     res.send(result);
   });
 });
+
+app.get("/borrow/notreturned", function (req, res) {
+  db.all("SELECT *, material.name as materialName, user.firstname as firstname, user.lastname as lastname FROM borrow JOIN user ON userID = user.id JOIN material ON materialID = material.id WHERE isReturned = false;", function (err, result) {
+    if (err) throw err;
+    res.send(result);
+  });
+});
 //Va chercher tous les emprunts validés par l'admin
 app.get("/borrow/validated", function (req, res) {
   db.all(
