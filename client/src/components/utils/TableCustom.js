@@ -7,14 +7,31 @@ import {
   Th,
   Tbody,
   Td,
+  Button,
 } from "@chakra-ui/react";
 import React from "react";
 import { getDateString } from "../../utils";
+import axios from "axios";
 
 export const TableCustom = ({ materials, title, admin, buttons }) => {
   const materialsSorted = materials.sort(
     (a, b) => new Date(a.startDate) - new Date(b.startDate)
   );
+  const validation = (id) => {
+    console.log(materialsSorted);
+    axios
+      .put("/borrow/validation", { choice: true, borrowID: id })
+      .then((res) => {
+        console.log(res);
+      });
+  };
+  const refuse = (id) => {
+    axios
+      .put("/borrow/validation", { choice: false, borrowID: id })
+      .then((res) => {
+        console.log(res);
+      });
+  };
   return (
     <Box
       boxShadow="xl"
@@ -56,6 +73,28 @@ export const TableCustom = ({ materials, title, admin, buttons }) => {
                 <Td date fontWeight="semibold">
                   {getDateString(material.endDate)}
                 </Td>
+                {buttons && (
+                  <Td>
+                    <Button
+                      onClick={() => {
+                        validation(material.id);
+                      }}
+                    >
+                      Valider
+                    </Button>
+                  </Td>
+                )}
+                {buttons && (
+                  <Td>
+                    <Button
+                      onClick={() => {
+                        refuse(material.id);
+                      }}
+                    >
+                      Refuser
+                    </Button>
+                  </Td>
+                )}
               </Tr>
             );
           })}
