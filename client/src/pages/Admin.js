@@ -6,7 +6,6 @@ export const Admin = () => {
   return (
     <Box>
       <Heading>Admin</Heading>
-      <AllReservations />
     </Box>
   );
 };

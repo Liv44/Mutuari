@@ -9,6 +9,7 @@ import { Admin } from "./pages/Admin";
 import { DashboardUser } from "./pages/DashboardUser";
 
 import { Box } from "@chakra-ui/react";
+import { AllReservations } from "./pages/admin/AllReservations";
 
 function App() {
   return (
@@ -39,7 +40,11 @@ function App() {
           <Route exact path="/form" element={<Form />}></Route>
           <Route exact path="/admin" element={<Admin />}></Route>
           <Route exact path="/register" element={<Register />}></Route>
-
+          <Route
+            exact
+            path="/admin/reservations"
+            element={<AllReservations />}
+          ></Route>
           <Route></Route>
         </Routes>
       </Router>
