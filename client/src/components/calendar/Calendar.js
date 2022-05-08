@@ -20,13 +20,26 @@ export const Calendar = () => {
     const setCorrespondingDaysOfWeek = (date) => {
         const dayOfMonth = date.getDate();
         const dayOfWeek = (date.getDay() + 6) % 7;
-        // const firstDayOfWeek = new Date(date.setDate(dayOfMonth - dayOfWeek));
+
+        let refDate = new Date(date);
+
+        const firstDayOfWeek = new Date(refDate.setDate(dayOfMonth - dayOfWeek));
         // const lastDayOfWeek = new Date(date.setDate(dayOfMonth - dayOfWeek + 6));
         // console.log(firstDayOfWeek, lastDayOfWeek)
         let datesOfWeek = [];
 
         for (let i = 0; i < 7; i++) {
-            datesOfWeek[i] = new Date(date.setDate(dayOfMonth - dayOfWeek + i)).getDate();
+
+            let day = new Date(new Date(refDate).setDate(firstDayOfWeek.getDate() + i));
+            console.log(day);
+            let isCorresponding = (day.getMonth() == date.getMonth()) ? true : false;
+            console.log("day", day.getMonth(), "date", date.getMonth())
+            let datesObj = {
+                isCorrespondingToMonth: isCorresponding,
+                date: day.getDate()
+            };
+
+            datesOfWeek[i] = datesObj;
         }
 
         console.log(datesOfWeek);
@@ -48,8 +61,6 @@ export const Calendar = () => {
     const [chosenMonthAndYear, setChosenMonthAndYear] = useState(actualMonth);
     const [chosenWeekNumber, setChosenWeekNumber] = useState(actualWeekNumber);
     const [chosenWeekDates, setChosenWeekDates] = useState(setCorrespondingDaysOfWeek(new Date()));
-
-    setCorrespondingDaysOfWeek(new Date(2022, 4, 8));
 
     const setNewWeek = (state) => {
 
@@ -110,10 +121,10 @@ export const Calendar = () => {
                     <Thead>
                         <Tr>
                             {
-                                chosenWeekDates.map((date, index) => (
+                                chosenWeekDates.map((dateObj, index) => (
                                     <Th key={index} width="14%" textAlign="center" fontSize={11}>
                                         {daysOfWeek[index]}
-                                        {date}
+                                        {dateObj.date}
                                     </Th>
                                 ))
                             }
@@ -121,13 +132,21 @@ export const Calendar = () => {
                     </Thead>
                     <Tbody height="22em">
                         <Tr>
+                            {/* <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td>
                             <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td>
                             <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td>
                             <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td>
                             <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td>
                             <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td>
-                            <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td>
-                            <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td>
+                            <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td> */}
+
+                            {
+                                chosenWeekDates.map((dateObj, index) => (
+                                    <Td key={index} borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" backgroundColor={(dateObj.isCorrespondingToMonth) ? "" : "#EDF2F7"}>
+                                        
+                                    </Td>
+                                ))
+                            }
                         </Tr>
                     </Tbody>
                 </Table>
