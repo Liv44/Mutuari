@@ -26,6 +26,20 @@ export const Calendar = () => {
         })
     }
 
+    const getUsers = () => {
+        axios.get("/users").then((resp) => {
+            console.log(resp.data);
+            setListOfUsers(resp.data);
+        })
+    }
+
+    const getMaterials = () => {
+        axios.get("/materials").then((resp) => {
+            console.log(resp.data);
+            setListOfMaterials(resp.data);
+        })
+    }
+
     const setCorrespondingDaysOfWeek = (date) => {
         const dayOfMonth = date.getDate();
         const dayOfWeek = (date.getDay() + 6) % 7;
@@ -71,9 +85,11 @@ export const Calendar = () => {
     const [chosenWeekNumber, setChosenWeekNumber] = useState(actualWeekNumber);
     const [chosenWeekDates, setChosenWeekDates] = useState(setCorrespondingDaysOfWeek(new Date()));
 
-    const [chosenUser, setChosenUser] = useState(-1);
-    const [chosenMaterial, setChosenMaterial] = useState(-1);
+    const [chosenUser, setChosenUser] = useState("");
+    const [chosenMaterial, setChosenMaterial] = useState("");
     const [listOfLoans, setListOfLoans] = useState([]);
+    const [listOfUsers, setListOfUsers] = useState([]);
+    const [listOfMaterials, setListOfMaterials] = useState([]);
     const [loansOfWeek, setLoansOfWeek] = useState([]);
 
     const setNewWeek = (state) => {
@@ -118,11 +134,11 @@ export const Calendar = () => {
 
         const loansInActualWeek = listOfLoans.filter((loan) => {
             
-            if(chosenUser != -1 && loan.userID != chosenUser) {
+            if(chosenUser != "" && loan.userID != chosenUser) {
                 return false;
             }
 
-            if(chosenMaterial != -1 && loan.materialID != chosenMaterial) {
+            if(chosenMaterial != "" && loan.materialID != chosenMaterial) {
                 return false;
             }
 
@@ -183,12 +199,14 @@ export const Calendar = () => {
 
     useEffect(() => {
         getBorrow();
+        getUsers();
+        getMaterials();
     }, [])
 
     useEffect(() => {
         console.log("ListOfLoans", listOfLoans);
         setCorrespondingLoans();
-    }, [listOfLoans])
+    }, [listOfLoans, chosenMaterial, chosenUser])
 
     return (
         <Box      
@@ -204,8 +222,16 @@ export const Calendar = () => {
             <Box display="flex" flexDirection="row" justifyContent="space-between" marginBottom="2em">
                 <Heading as="h3" size="lg" textAlign="left" mb={5}>Calendrier</Heading>
                 <Box display="flex" flexDirection="row">
-                    <Select mr={5} variant='outline' placeholder='Matériels' size="md" borderColor="purple" border="2px" width="20em"></Select>
-                    <Select variant='outline' placeholder='Utilisateurs' size="md" borderColor="purple" border="2px" width="20em"></Select>
+                    <Select onChange={(e) => {setChosenMaterial(e.target.value)}} mr={5} variant='outline' placeholder='Matériels' size="md" borderColor="purple" border="2px" width="20em">
+                        {listOfMaterials.map((material, index) => (
+                            <option key={index} value={material.id}>{material.name}</option>
+                        ))}
+                    </Select>
+                    <Select onChange={(e) => {setChosenUser(e.target.value); console.log(e.target.value)}} variant='outline' defaultValue={-1} placeholder='Utilisateurs' size="md" borderColor="purple" border="2px" width="20em">
+                        {listOfUsers.map((user, index) => (
+                            <option key={index} value={user.id}>{user.firstname} {user.lastname}</option>
+                        ))}
+                    </Select>
                 </Box>
             </Box>
             <Box>
