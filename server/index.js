@@ -134,28 +134,26 @@ app.get("/users/:id", function (req, res) {
   );
 });
 
-//Sélection de tous les emprunts validés d'un utilisateur
-app.get("/users/:id/borrow/validated", function (req, res) {
-  db.all(
-    "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id =borrow.userID WHERE user.id = ? AND borrow.isValidated = true",
-    req.params.id,
-    function (err, result) {
-      if (err) throw err;
-      res.send(result);
-    }
-  );
-});
-
 //Sélection de tous les emprunts non validés d'un utilisateur
-app.get("/users/:id/borrow", function (req, res) {
-  db.all(
-    "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE user.id = ? AND borrow.isValidated = false",
-    req.params.id,
-    function (err, result) {
-      if (err) throw err;
-      res.send(result);
-    }
-  );
+app.get("/users/:id/borrow/:state", function (req, res) {
+  let query = "";
+  switch (req.params.state) {
+    case "tovalidate":
+      query =
+        "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE user.id = ? AND borrow.isValidated = false AND borrow.isRefused=false";
+      break;
+    case "refused":
+      query =
+        "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE user.id = ? AND borrow.isRefused = true";
+      break;
+    case "validated":
+      query =
+        "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE user.id = ? AND borrow.isValidated = true";
+  }
+  db.all(query, req.params.id, function (err, result) {
+    if (err) throw err;
+    res.send(result);
+  });
 });
 
 //

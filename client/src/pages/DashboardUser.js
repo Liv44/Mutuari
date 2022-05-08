@@ -9,22 +9,26 @@ import { Form } from "../components/dashboardUser/Form";
 export const DashboardUser = () => {
   const [materials, setMaterials] = useState([]);
   const [materialsnotvalidated, setMaterialsnotvalidated] = useState([]);
+  const [materialsrefused, setMaterialsrefused] = useState([]);
   useEffect(() => {
     axios.get("/users/3/borrow/validated").then((res) => {
       setMaterials(res.data);
       console.log(materials);
     });
-    axios.get("/users/3/borrow").then((res) => {
+    axios.get("/users/3/borrow/tovalidate").then((res) => {
       setMaterialsnotvalidated(res.data);
     });
-  }, []);
+    axios.get("users/3/borrow/refused").then((res) => {
+      setMaterialsrefused(res.data);
+    });
+  }, [materialsnotvalidated, materials]);
   return (
     <Box mb={5} p={5}>
       <Box boxSize="sm" height="100%">
         <Image src={logoMutuari}></Image>
       </Box>
       <Heading mb={5}>Dashboard User</Heading>
-      <Flex justifyContent="space-around" alignItems="flex-start">
+      <Flex alignItems="flex-start" justify="space-around">
         <VStack>
           <TableCustom
             materials={materials}
@@ -35,6 +39,11 @@ export const DashboardUser = () => {
             materials={materialsnotvalidated}
             admin={false}
             title="Emprunts non validés"
+          ></TableCustom>
+          <TableCustom
+            materials={materialsrefused}
+            admin={false}
+            title="Emprunts refusés"
           ></TableCustom>
         </VStack>
         <Form></Form>
