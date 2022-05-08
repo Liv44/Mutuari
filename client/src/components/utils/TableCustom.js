@@ -18,7 +18,6 @@ export const TableCustom = ({ materials, title, admin, buttons }) => {
     (a, b) => new Date(a.startDate) - new Date(b.startDate)
   );
   const validation = (id) => {
-    console.log(materialsSorted);
     axios
       .put("/borrow/validation", { choice: true, borrowID: id })
       .then((res) => {

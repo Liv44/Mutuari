@@ -11,6 +11,7 @@ import { AdminCalendar } from "./pages/AdminCalendar";
 
 import { Box } from "@chakra-ui/react";
 import { AllReservations } from "./pages/admin/AllReservations";
+import { AllMaterials } from "./pages/admin/AllMaterials";
 
 function App() {
   return (
@@ -46,6 +47,11 @@ function App() {
             exact
             path="/admin/reservations"
             element={<AllReservations />}
+          ></Route>
+          <Route
+            exact
+            path="/admin/materials"
+            element={<AllMaterials />}
           ></Route>
           <Route></Route>
         </Routes>
