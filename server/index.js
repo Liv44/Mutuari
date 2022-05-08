@@ -46,6 +46,34 @@ app.get("/materials", function (req, res) {
     res.send(result);
   });
 });
+
+app.put("/materials/modify/:id", function (req, res) {
+  const id = req.params.id;
+  const { name, description } = req.body;
+  db.run(
+    "UPDATE material SET name = ?, description = ? WHERE id = ?",
+    [name, description, id],
+    function (err, result) {
+      res.send({ modified: true });
+    }
+  );
+});
+app.delete("/materials/delete/:id", function (req, res) {
+  const id = req.params.id;
+  db.run("DELETE FROM material WHERE id = ?", id, function (err, result) {
+    res.send({ deleted: true });
+  });
+});
+app.post("/newmaterial", function (req, res) {
+  db.run(
+    "INSERT INTO material (name, description) VALUES (?, ?)",
+    [req.body.name, req.body.description],
+    function (err, result) {
+      if (err) throw err;
+      res.send({ added: true });
+    }
+  );
+});
 app.get("/borrow", function (req, res) {
   db.all("SELECT * FROM borrow", function (err, result) {
     if (err) throw err;

@@ -13,7 +13,6 @@ export const DashboardUser = () => {
   useEffect(() => {
     axios.get("/users/3/borrow/validated").then((res) => {
       setMaterials(res.data);
-      console.log(materials);
     });
     axios.get("/users/3/borrow/tovalidate").then((res) => {
       setMaterialsnotvalidated(res.data);
