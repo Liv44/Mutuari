@@ -3,6 +3,8 @@ import { ArrowLeftIcon, ArrowRightIcon } from '@chakra-ui/icons';
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+import {Navbar} from "../NavBar"
+
 export const Calendar = () => {
 
     //"Extension" de la classe "Date" récupérée sur : https://www.epochconverter.com/weeknumbers
@@ -172,6 +174,8 @@ export const Calendar = () => {
             boxShadow="xl"
             borderRadius="30px"
             overflow="scroll"
+            mt={20}
+            mr={20}
             mb={5}
             boxSize="5xl"
             backgroundColor="white"
