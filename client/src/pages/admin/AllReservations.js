@@ -3,6 +3,8 @@ import { TableCustom } from "../../components/utils/TableCustom";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+import {Navbar} from "../../components/admin/NavBar"
+
 export const AllReservations = () => {
   const [toValidate, setToValidate] = useState([]);
   const [validated, setValidated] = useState([]);
@@ -20,24 +22,27 @@ export const AllReservations = () => {
     });
   }, [validated, toValidate, refused]);
   return (
-    <Box>
-      <Heading>Admin</Heading>
-      <TableCustom
-        materials={toValidate}
-        title="Emprunts à valider"
-        admin={true}
-        buttons={true}
-      ></TableCustom>
-      <TableCustom
-        materials={validated}
-        title="Emprunts validés"
-        admin={true}
-      ></TableCustom>
-      <TableCustom
-        materials={refused}
-        title="Emprunts refusés"
-        admin={true}
-      ></TableCustom>
+    <Box display="flex" flexDirection="row" justifyContent="space-between">
+      <Navbar selected="loans"></Navbar>
+      <Box mr={20}>
+        <TableCustom
+          materials={toValidate}
+          title="Emprunts à valider"
+          admin={true}
+          buttons={true}
+        ></TableCustom>
+        <TableCustom
+          materials={validated}
+          title="Emprunts validés"
+          admin={true}
+        ></TableCustom>
+        <TableCustom
+          materials={refused}
+          title="Emprunts refusés"
+          admin={true}
+        ></TableCustom>
+      </Box>
+
     </Box>
   );
 };

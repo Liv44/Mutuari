@@ -37,6 +37,7 @@ export const TableCustom = ({ materials, title, admin, buttons }) => {
       borderRadius="30px"
       overflow="scroll"
       mb={5}
+      mt={20}
       boxSize="2xl"
       backgroundColor="white"
       maxHeight="250px"
