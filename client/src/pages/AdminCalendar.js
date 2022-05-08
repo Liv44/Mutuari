@@ -1,5 +1,5 @@
 import { Box, Heading } from "@chakra-ui/react";
-import { Calendar } from "../components/calendar/Calendar";
+import { Calendar } from "../components/admin/calendar/Calendar";
 import React from "react";
 
 export const AdminCalendar = () => {

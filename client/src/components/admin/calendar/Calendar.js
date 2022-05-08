@@ -21,25 +21,25 @@ export const Calendar = () => {
     //Requête pour récupérer les Emprunts
     const getBorrow = () => {
         axios.get("/borrow/notreturned").then((resp) => {
-            console.log(resp.data);
             setListOfLoans(resp.data);
         })
     }
 
+    //Requête pour récupérer les Utilisateurs
     const getUsers = () => {
         axios.get("/users").then((resp) => {
-            console.log(resp.data);
             setListOfUsers(resp.data);
         })
     }
 
+    //Requête pour récupérer le Matériels
     const getMaterials = () => {
         axios.get("/materials").then((resp) => {
-            console.log(resp.data);
             setListOfMaterials(resp.data);
         })
     }
 
+    //Permet de mettre dans un tableau les 7 dates de la semaine.
     const setCorrespondingDaysOfWeek = (date) => {
         const dayOfMonth = date.getDate();
         const dayOfWeek = (date.getDay() + 6) % 7;
@@ -47,16 +47,12 @@ export const Calendar = () => {
         let refDate = new Date(date);
 
         const firstDayOfWeek = new Date(refDate.setDate(dayOfMonth - dayOfWeek));
-        // const lastDayOfWeek = new Date(date.setDate(dayOfMonth - dayOfWeek + 6));
-        // console.log(firstDayOfWeek, lastDayOfWeek)
         let datesOfWeek = [];
 
         for (let i = 0; i < 7; i++) {
 
             let day = new Date(new Date(refDate).setDate(firstDayOfWeek.getDate() + i));
-            // console.log(day);
             let isCorresponding = (day.getMonth() == date.getMonth()) ? true : false;
-            // console.log("day", day.getMonth(), "date", date.getMonth())
             let datesObj = {
                 isCorrespondingToMonth: isCorresponding,
                 date: day.getDate()
@@ -65,12 +61,8 @@ export const Calendar = () => {
             datesOfWeek[i] = datesObj;
         }
 
-        // console.log(datesOfWeek);
         return datesOfWeek;
     }
-
-    //Mettre une date de référence (initialisation sur le jour actuel)
-    // let referenceDate = new Date();
 
     //Mettre le mois et l'année actuelle sous le bon format (MONTH YEAR)
     const optionsForMonth = { month: 'long', year: "numeric"};
@@ -105,21 +97,7 @@ export const Calendar = () => {
         setCorrespondingLoans();
     }
 
-    // const optionsForMonth = { month: 'long', year: "numeric"};
-    // const actualMonth = new Intl.DateTimeFormat('fr-FR', optionsForMonth).format().toUpperCase();
-    // console.log(new Intl.DateTimeFormat('fr-FR', optionsForMonth).format().toUpperCase());
-
-    // var options = { weekday: 'long'};
-    // console.log(new Intl.DateTimeFormat('fr-FR', options).format());
-
-    console.log(actualMonth);
-    console.log(actualWeekNumber);
-    // console.log(firstDayOfWeek);
-
     const setCorrespondingLoans = () => {
-        // if(chosenUser == -1 || chosenMaterial == -1 ) {
-
-        // }
 
         const dayOfMonth = referenceDate.getDate();
         const dayOfWeek = (referenceDate.getDay() + 6) % 7;
@@ -128,9 +106,6 @@ export const Calendar = () => {
 
         const weekStartDate = new Date(refDate.setDate(dayOfMonth - dayOfWeek));
         const weekEndDate = new Date(refDate.setDate(dayOfMonth - dayOfWeek + 6));
-
-        console.log("weekStartDate", weekStartDate)
-        console.log("weekEndDate", weekEndDate);
 
         const loansInActualWeek = listOfLoans.filter((loan) => {
             
@@ -145,16 +120,6 @@ export const Calendar = () => {
             const startDate = new Date(loan.startDate);
             const endDate = new Date(loan.endDate);
 
-            console.log(startDate);
-            console.log(endDate);
-
-            console.log(startDate <= weekStartDate && endDate >= weekStartDate && endDate <= weekEndDate);
-            console.log(startDate >= weekStartDate && startDate <= weekEndDate && endDate >= weekEndDate);
-            console.log(startDate >= weekStartDate && endDate <= weekEndDate);
-            console.log(startDate <= weekStartDate && endDate >= weekEndDate)
-            // const weekStartDate = new Date();
-            // const weekEndDate = new Date();
-
             if(startDate <= weekStartDate && endDate >= weekStartDate && endDate <= weekEndDate) {
                 return true;
             } else if(startDate >= weekStartDate && startDate <= weekEndDate && endDate >= weekEndDate) {
@@ -165,18 +130,13 @@ export const Calendar = () => {
                 return false;
             }
         })
-
-        // console.log("newLoans",  loansInActualWeek);
-
+        
         let loansPerDay = []
 
         for(let i = 0; i < 7; i++) {
             let actualDayObject = [];
 
             loansInActualWeek.forEach(loan => {
-                // if(new Date(loan.startDate).getDay() >= i && new Date(loan.endDate).getDay() <= i) {
-
-                // }
                 //Faire condition de si le startDate etendDate permette d'avoir la valeur entre firstDate+i
                 let day = new Date(new Date(refDate).setDate(weekStartDate.getDate() + i));
                 day.setHours(0,0,0,0);
@@ -184,7 +144,7 @@ export const Calendar = () => {
                 startDate.setHours(0,0,0,0);
                 let endDate = new Date(loan.endDate);
                 endDate.setHours(0,0,0,0);
-                // console.log(day, endDate);
+
                 if(startDate <= day && endDate >= day) {
                     
                     actualDayObject.push(loan);
@@ -193,7 +153,7 @@ export const Calendar = () => {
 
             loansPerDay.push(actualDayObject)
         }
-        // console.log(loansPerDay);
+
         setLoansOfWeek(loansPerDay);
     }
 
@@ -204,7 +164,6 @@ export const Calendar = () => {
     }, [])
 
     useEffect(() => {
-        console.log("ListOfLoans", listOfLoans);
         setCorrespondingLoans();
     }, [listOfLoans, chosenMaterial, chosenUser])
 
@@ -263,14 +222,6 @@ export const Calendar = () => {
                     </Thead>
                     <Tbody height="22em">
                         <Tr>
-                            {/* <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td>
-                            <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td>
-                            <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td>
-                            <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td>
-                            <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td>
-                            <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td>
-                            <Td borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" borderColor="gray.100"></Td> */}
-
                             {
                                 loansOfWeek.map((column, index) => (
                                     <Td key={index} borderRight="1px solid #EDF2F7" borderLeft="1px solid #EDF2F7" backgroundColor={(chosenWeekDates[index].isCorrespondingToMonth) ? "" : "#EDF2F7"}>
