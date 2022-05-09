@@ -264,8 +264,8 @@ app.post("/newborrow", function (req, res) {
   if (req.session.user === undefined) {
     res.send("Veuillez vous connecter");
   } else {
-    const { materialID, userID, startDate, endDate } = req.body;
-    const userIDFound = req.session.user[0].id;
+    const { materialID, startDate, endDate } = req.body;
+    const userIDFound = req.session.user.id;
     db.all(
       "SELECT materialID, startDate, endDate FROM borrow WHERE materialID = ?",
       materialID,
@@ -294,7 +294,7 @@ app.post("/newborrow", function (req, res) {
         if (disponibility) {
           db.run(
             "INSERT INTO borrow(materialID, userID, startDate, endDate) VALUES (?, ?, ?, ?)",
-            [materialID, userIDFound, startDate, endDate],
+            [materialID, userIDFound,startDate, endDate],
             function (err, result) {
               if (err) throw err;
               res.send({ added: true, result: result });
