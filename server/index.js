@@ -41,15 +41,15 @@ app.use(
 
 const PORT = process.env.PORT || 8055;
 
-app.get("/", (req, res) => {
+app.get("/api/", (req, res) => {
   res.json({ message: "Hello World!" });
 });
 
-app.get("/api", (req, res) => {
+app.get("/api/api", (req, res) => {
   res.json({ message: "Hello World!" });
 });
 
-app.get("/authentification", function (req, res) {
+app.get("/api/authentification", function (req, res) {
   if (req.session.user === undefined) {
     res.send({ auth: false });
   } else if (req.session.user.isAdmin === 1) {
@@ -67,7 +67,7 @@ app.get("/authentification", function (req, res) {
   }
 });
 
-app.get("/users", function (req, res) {
+app.get("/api/users", function (req, res) {
   db.all(
     "SELECT id, firstname, lastname, email, isAdmin FROM user",
     function (err, result) {
@@ -77,14 +77,14 @@ app.get("/users", function (req, res) {
     }
   );
 });
-app.get("/materials", function (req, res) {
+app.get("/api/materials", function (req, res) {
   db.all("SELECT * FROM material", function (err, result) {
     if (err) throw err;
     res.send(result);
   });
 });
 
-app.put("/materials/modify/:id", function (req, res) {
+app.put("/api/materials/modify/:id", function (req, res) {
   const id = req.params.id;
   const { name, description } = req.body;
   db.run(
@@ -101,7 +101,7 @@ app.delete("/materials/delete/:id", function (req, res) {
     res.send({ deleted: true });
   });
 });
-app.post("/newmaterial", function (req, res) {
+app.post("/api/newmaterial", function (req, res) {
   db.run(
     "INSERT INTO material (name, description) VALUES (?, ?)",
     [req.body.name, req.body.description],
@@ -111,21 +111,21 @@ app.post("/newmaterial", function (req, res) {
     }
   );
 });
-app.get("/borrow", function (req, res) {
+app.get("/api/borrow", function (req, res) {
   db.all("SELECT * FROM borrow", function (err, result) {
     if (err) throw err;
     res.send(result);
   });
 });
 
-app.get("/borrow/notreturned", function (req, res) {
+app.get("/api/borrow/notreturned", function (req, res) {
   db.all("SELECT *, material.name as materialName, user.firstname as firstname, user.lastname as lastname FROM borrow JOIN user ON userID = user.id JOIN material ON materialID = material.id WHERE isReturned = false;", function (err, result) {
     if (err) throw err;
     res.send(result);
   });
 });
 //Va chercher tous les emprunts validés par l'admin
-app.get("/borrow/validated", function (req, res) {
+app.get("/api/borrow/validated", function (req, res) {
   db.all(
     "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE isValidated = true",
     function (err, result) {
@@ -135,7 +135,7 @@ app.get("/borrow/validated", function (req, res) {
   );
 });
 //Va chercher tous les emprunts À VALIDER par l'admin
-app.get("/borrow/tovalidate", function (req, res) {
+app.get("/api/borrow/tovalidate", function (req, res) {
   db.all(
     "SELECT borrow.id, material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE isValidated = false AND isRefused=false",
     function (err, result) {
@@ -146,7 +146,7 @@ app.get("/borrow/tovalidate", function (req, res) {
 });
 
 //Va chercher tous les emprunts REFUSÉS par l'admin
-app.get("/borrow/refused", function (req, res) {
+app.get("/api/borrow/refused", function (req, res) {
   db.all(
     "SELECT borrow.id, material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE isRefused=true",
     function (err, result) {
@@ -157,7 +157,7 @@ app.get("/borrow/refused", function (req, res) {
 });
 
 //Modification du statut de validation de l'emprunt (isValidated ou isRefused)
-app.put("/borrow/validation", function (req, res) {
+app.put("/api/borrow/validation", function (req, res) {
   //Plus tard, ajouter une vérification de l'ID de l'admin
   //pour qu'il n'y ait que lui qui puisse modifier le statut de validation
 
@@ -185,7 +185,7 @@ app.put("/borrow/validation", function (req, res) {
   }
 });
 
-app.get("/materials/:id", function (req, res) {
+app.get("/api/materials/:id", function (req, res) {
   db.get(
     "SELECT * FROM material WHERE id = ?",
     req.params.id,
@@ -195,7 +195,7 @@ app.get("/materials/:id", function (req, res) {
     }
   );
 });
-app.get("/users/:id", function (req, res) {
+app.get("/api/users/:id", function (req, res) {
   db.get(
     "SELECT firstname, lastname, isAdmin, email FROM user WHERE id = ?",
     req.params.id,
@@ -207,7 +207,7 @@ app.get("/users/:id", function (req, res) {
 });
 
 //Sélection de tous les emprunts non validés d'un utilisateur
-app.get("/users/:id/borrow/:state", function (req, res) {
+app.get("/api/users/:id/borrow/:state", function (req, res) {
   if (req.session.user === undefined) {
     res.send("Veuillez vous connecter");
   } else {
@@ -234,7 +234,7 @@ app.get("/users/:id/borrow/:state", function (req, res) {
 });
 
 //
-app.get("/materials/:id/borrow/:startdate/:enddate", function (req, res) {
+app.get("/api/materials/:id/borrow/:startdate/:enddate", function (req, res) {
   db.all(
     "SELECT materialID, startDate, endDate FROM borrow WHERE materialID = ?",
     req.params.id,
@@ -265,7 +265,7 @@ app.get("/materials/:id/borrow/:startdate/:enddate", function (req, res) {
   );
 });
 
-app.post("/newborrow", function (req, res) {
+app.post("/api/newborrow", function (req, res) {
   if (req.session.user === undefined) {
     res.send("Veuillez vous connecter");
   } else {
@@ -313,7 +313,7 @@ app.post("/newborrow", function (req, res) {
   }
 });
 //Ajouter un nouvel utilisateur
-app.post("/adduser", function (req, res) {
+app.post("/api/adduser", function (req, res) {
   const { firstname, lastname, email, password } = req.body;
   if (firstname === "" || lastname === "" || email === "" || password === "") {
     res.send({ added: false, err: "params" });
@@ -349,7 +349,7 @@ app.post("/adduser", function (req, res) {
 });
 
 //Se connecter
-app.post("/login", function (req, res) {
+app.post("/api/login", function (req, res) {
   const { email, password } = req.body;
 
   //Vérification des champs remplis
@@ -382,7 +382,7 @@ app.post("/login", function (req, res) {
     });
   }
 });
-app.get("/logout", (req, res) => {
+app.get("/api/logout", (req, res) => {
   req.session.user = undefined;
   res.send("disconnected");
 });
@@ -395,7 +395,7 @@ app.get("/logout", (req, res) => {
 //   console.log("Database closed");
 // });
 
-app.get("/users", function (req, res) {
+app.get("/api/users", function (req, res) {
   let query = "SELECT id, firstname, lastname FROM user"
   db.all(query, function (err, result) {
     if (err) throw err;
@@ -403,7 +403,7 @@ app.get("/users", function (req, res) {
   });
 });
 
-app.get("/borrow/materialname", function (req, res) {
+app.get("/api/borrow/materialname", function (req, res) {
   let query = "SELECT *, material.name as materialName FROM borrow INNER JOIN material ON material.id = borrow.materialID AND borrow.isValidated = true";
   db.all(query, function (err, result) {
     if (err) throw err;
@@ -411,7 +411,7 @@ app.get("/borrow/materialname", function (req, res) {
   });
 })
 
-app.get("/borrows/:userid", function (req, res) {
+app.get("/api/borrows/:userid", function (req, res) {
   let query = "SELECT * FROM borrow WHERE userID = ? AND isValidated = true";
   db.all(query, req.params.userid, function (err, result) {
     if (err) throw err;
@@ -419,7 +419,7 @@ app.get("/borrows/:userid", function (req, res) {
   });
 })
 
-app.post("/signatureborrow", function (req, res) {
+app.post("/api/signatureborrow", function (req, res) {
   const {userID, borrow, signature} = req.body;
 
   const query = "UPDATE borrow SET isBorrowed = ?, isReturned = ? WHERE id = ?";

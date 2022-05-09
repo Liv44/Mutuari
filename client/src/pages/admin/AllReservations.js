@@ -10,7 +10,7 @@ export const AllReservations = () => {
   const [validated, setValidated] = useState([]);
   const [refused, setRefused] = useState([]);
   const [isConnected, setConnected] = useState(false);
-  axios.get("/authentification").then((res) => {
+  axios.get("/api/authentification").then((res) => {
     if (res.data.auth === false) {
       setConnected(false);
       window.location.href = "/";
@@ -22,13 +22,13 @@ export const AllReservations = () => {
     }
   });
   useEffect(() => {
-    axios.get("/borrow/tovalidate").then((res) => {
+    axios.get("/api/borrow/tovalidate").then((res) => {
       setToValidate(res.data);
     });
-    axios.get("/borrow/validated").then((res) => {
+    axios.get("/api/borrow/validated").then((res) => {
       setValidated(res.data);
     });
-    axios.get("/borrow/refused").then((res) => {
+    axios.get("/api/borrow/refused").then((res) => {
       setRefused(res.data);
     });
   }, [validated, toValidate, refused]);

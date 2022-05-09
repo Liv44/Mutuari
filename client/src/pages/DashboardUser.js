@@ -13,18 +13,18 @@ export const DashboardUser = () => {
   const [materialsrefused, setMaterialsrefused] = useState([]);
   const [user, setUser] = useState("");
   useEffect(() => {
-    axios.get("/authentification").then((res) => {
+    axios.get("/api/authentification").then((res) => {
       if (res.data.auth === false) {
         window.location.href = "/";
       } else if (res.data.auth && res.data.isAdmin === false) {
         setUser(res.data.userName);
-        axios.get("/users/3/borrow/validated").then((res) => {
+        axios.get("/api/users/3/borrow/validated").then((res) => {
           setMaterials(res.data);
         });
-        axios.get("/users/3/borrow/tovalidate").then((res) => {
+        axios.get("/api/users/3/borrow/tovalidate").then((res) => {
           setMaterialsnotvalidated(res.data);
         });
-        axios.get("users/3/borrow/refused").then((res) => {
+        axios.get("/api/users/3/borrow/refused").then((res) => {
           setMaterialsrefused(res.data);
         });
       } else if (res.data.auth && res.data.isAdmin) {

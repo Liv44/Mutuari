@@ -7,7 +7,7 @@ import axios from "axios";
 export const AdminCalendar = () => {
   const [isConnected, setConnected] = useState(false);
 
-  axios.get("/authentification").then((res) => {
+  axios.get("/api/authentification").then((res) => {
     if (res.data.auth === false) {
       window.location.href = "/";
     } else if (res.data.auth && res.data.isAdmin === false) {

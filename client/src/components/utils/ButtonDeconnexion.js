@@ -4,7 +4,7 @@ import axios from "axios";
 
 export const ButtonDeconnexion = () => {
   const deconnexion = () => {
-    axios.get("/logout").then((res) => {
+    axios.get("/api/logout").then((res) => {
       if (res.data === "disconnected") {
         console.log("disconnected");
         window.location.href = "/";

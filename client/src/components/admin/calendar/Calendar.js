@@ -22,21 +22,21 @@ export const Calendar = () => {
 
     //Requête pour récupérer les Emprunts
     const getBorrow = () => {
-        axios.get("/borrow/notreturned").then((resp) => {
+        axios.get("/api/borrow/notreturned").then((resp) => {
             setListOfLoans(resp.data);
         })
     }
 
     //Requête pour récupérer les Utilisateurs
     const getUsers = () => {
-        axios.get("/users").then((resp) => {
+        axios.get("/api/users").then((resp) => {
             setListOfUsers(resp.data);
         })
     }
 
     //Requête pour récupérer le Matériels
     const getMaterials = () => {
-        axios.get("/materials").then((resp) => {
+        axios.get("/api/materials").then((resp) => {
             setListOfMaterials(resp.data);
         })
     }

@@ -7,7 +7,7 @@ import React, { useState } from "react";
 
 export const AllMaterials = () => {
   const [isConnected, setConnected] = useState(false);
-  axios.get("/authentification").then((res) => {
+  axios.get("/api/authentification").then((res) => {
     if (res.data.auth === false) {
       setConnected(false);
       window.location.href = "/";

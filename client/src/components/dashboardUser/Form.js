@@ -22,7 +22,7 @@ export const Form = () => {
   const [notAvailable, setAvailable] = useState(false);
 
   useEffect(() => {
-    axios.get("/materials").then((res) => {
+    axios.get("/api/materials").then((res) => {
       setMaterials(res.data);
     });
   }, [materials]);

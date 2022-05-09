@@ -6,7 +6,7 @@ import axios from "axios";
 
 export const Home = () => {
   useEffect(() => {
-    axios.get("/authentification").then((res) => {
+    axios.get("/api/authentification").then((res) => {
       if (res.data.auth === true) {
         if (res.data.isAdmin === true) {
           window.location.href = "/admin/materials";

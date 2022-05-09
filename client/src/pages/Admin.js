@@ -4,7 +4,7 @@ import React from "react";
 import { AllReservations } from "./admin/AllReservations";
 
 export const Admin = () => {
-  axios.get("authentification").then((res) => {
+  axios.get("/api/authentification").then((res) => {
     if (res.data.auth === false) {
       window.location.href = "/";
     } else if (res.data.auth && res.data.isAdmin === false) {

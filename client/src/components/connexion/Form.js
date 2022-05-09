@@ -23,7 +23,7 @@ export const Form = () => {
     setErrorMail(true);
     setErrorPassword(true);
 
-    axios.post("/login", { email: email, password: password }).then((res) => {
+    axios.post("/api/login", { email: email, password: password }).then((res) => {
       if (res.data.connected === true) {
         if (res.data.result.isAdmin === 1) {
           window.location.href = "/admin";

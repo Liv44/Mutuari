@@ -30,7 +30,7 @@ export const TrMaterial = ({ material }) => {
   };
   const validate = () => {
     axios
-      .put("/materials/modify/" + material.id, {
+      .put("/api/materials/modify/" + material.id, {
         name: materialName,
         description: materialDescription,
       })
@@ -38,7 +38,7 @@ export const TrMaterial = ({ material }) => {
     setModification(false);
   };
   const deleteMaterial = () => {
-    axios.delete("/materials/delete/" + material.id).then((res) => {
+    axios.delete("/api/materials/delete/" + material.id).then((res) => {
       if (res.data.deleted === true) {
         onClose();
       }

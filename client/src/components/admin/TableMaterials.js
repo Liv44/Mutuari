@@ -6,7 +6,7 @@ import { TrMaterial } from "./TrMaterial";
 export const TableMaterials = () => {
   const [materials, setMaterials] = useState([]);
   useEffect(() => {
-    axios.get("/materials").then((res) => {
+    axios.get("/api/materials").then((res) => {
       setMaterials(res.data);
     });
   }, [materials]);
