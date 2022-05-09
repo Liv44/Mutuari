@@ -13,7 +13,7 @@ import React from "react";
 import { getDateString } from "../../utils";
 import axios from "axios";
 
-export const TableCustom = ({ materials, title, admin, buttons }) => {
+export const TableCustom = ({ materials, title, admin, buttons, width }) => {
   const materialsSorted = materials.sort(
     (a, b) => new Date(a.startDate) - new Date(b.startDate)
   );
@@ -37,11 +37,12 @@ export const TableCustom = ({ materials, title, admin, buttons }) => {
       borderRadius="30px"
       overflow="scroll"
       mb={5}
-      mt={20}
       boxSize="2xl"
       backgroundColor="white"
       maxHeight="250px"
       p={5}
+      width={width ? width : undefined}
+      // width="100%"
     >
       <Heading as="h4" size="md" textAlign="left" mb={5}>
         {title}
