@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, VStack, Image, Button } from "@chakra-ui/react";
+import { Box, Flex, Heading, VStack, Image, Text } from "@chakra-ui/react";
 import React from "react";
 import logoMutuari from "../logoMutuari.svg";
 import { useEffect, useState } from "react";
@@ -35,12 +35,13 @@ export const DashboardUser = () => {
 
   return (
     <Box mb={5} p={5}>
-      <Box boxSize="sm" height="100%">
+      <Box boxSize="sm" height="100%" display="flex" justify="space-around">
         <Image src={logoMutuari}></Image>
+        <ButtonDeconnexion />
       </Box>
-      <Heading mb={5}>Dashboard User</Heading>
-      <p>Connected as : {user}</p>
-      <ButtonDeconnexion />
+      <Heading>Dashboard User</Heading>
+      <Text mb={5}>Connected as : {user}</Text>
+
       <Flex alignItems="flex-start" justify="space-around">
         <VStack>
           <TableCustom

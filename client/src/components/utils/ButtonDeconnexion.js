@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, VStack, Image, Button } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import React from "react";
 import axios from "axios";
 
@@ -11,5 +11,17 @@ export const ButtonDeconnexion = () => {
       }
     });
   };
-  return <Button onClick={deconnexion}>Déconnexion</Button>;
+  return (
+    <Button
+      width={200}
+      minWidth={200}
+      size="md"
+      borderRadius={20}
+      backgroundColor="red"
+      mt={10}
+      onClick={deconnexion}
+    >
+      Déconnexion
+    </Button>
+  );
 };
