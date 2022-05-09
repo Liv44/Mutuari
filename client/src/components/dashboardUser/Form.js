@@ -27,9 +27,9 @@ export const Form = () => {
     });
   }, [materials]);
   const handleSubmit = (event) => {
-    const userID = 3;
+    
     axios
-      .post("/newborrow", { materialID, userID, startDate, endDate })
+      .post("/newborrow", { materialID, startDate, endDate })
       .then((res) => {
         if (res.data.added) {
           setStartDate("");
