@@ -39,7 +39,7 @@ app.use(
   })
 );
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8055;
 app.get("/api", (req, res) => {
   res.json({ message: "Hello World!" });
 });
@@ -454,9 +454,9 @@ const temporaryData = [
 
 const getData = async () => {
 
-  let users = await axios({method: 'GET', url: "http://localhost:3001/users", json: true})
+  let users = await axios({method: 'GET', url: "http://localhost:8055/users", json: true})
 
-  let borrows = await axios({method: 'GET', url: "http://localhost:3001/borrow/materialname", json:true})
+  let borrows = await axios({method: 'GET', url: "http://localhost:8055/borrow/materialname", json:true})
 
   return {users: users.data, borrows: borrows.data};
 }
@@ -470,7 +470,7 @@ io.on('connection', async (client) => {
     //récupération des données de la signature du client
     client.on("getDataFromClient", (data) => {
         console.log("l'id de l'utilisateur est : ", data.userID)
-        axios.post("http://localhost:3001/signatureborrow", { userID: data.userID, borrow: data.borrow, signarture: data.signature })
+        axios.post("http://localhost:8055/signatureborrow", { userID: data.userID, borrow: data.borrow, signarture: data.signature })
     })
 
     client.on('disconnect', () => {
@@ -478,6 +478,6 @@ io.on('connection', async (client) => {
     });
 });
 
-server.listen(3001, () => {
-    console.log("Serveur en écoute sur le port 3001");
+server.listen(8055, () => {
+    console.log("Serveur en écoute sur le port 8055");
 });
