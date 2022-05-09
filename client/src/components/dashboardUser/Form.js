@@ -32,8 +32,12 @@ export const Form = () => {
       .post("/newborrow", { materialID, userID, startDate, endDate })
       .then((res) => {
         if (res.data.added) {
+          setStartDate("");
+          setEndDate("");
+          setMaterialID("");
+          setDisponibility(true);
+          setAvailable(false);
           alert("L'emprunt a bien été enregistré.");
-          window.location.reload(true);
         } else {
           alert("Il y a eu un problème lors de l'enregistrement de l'emprunt.");
         }
@@ -117,12 +121,15 @@ export const Form = () => {
         </FormControl>
         <FormControl mb={5} isInvalid={notAvailable}>
           <Select
+            isRequired
             onChange={(e) => {
               setMaterialID(e.target.value);
             }}
             value={materialID}
           >
-            <option value="">Choisir un matériel</option>
+            <option value="" selected disabled>
+              Choisir un matériel
+            </option>
             {materials.map((material) => (
               <option key={material.id} value={material.id}>
                 {material.name}
