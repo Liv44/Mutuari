@@ -19,9 +19,12 @@
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
-  "proxy": "http://localhost:3001",
+  "proxy": "http://141.95.166.131:8055",
+  "allowedHosts": [
+    "141.95.166.131"
+  ],
   "scripts": {
-    "start": "react-scripts start",
+    "start": "set PORT=8005 && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
