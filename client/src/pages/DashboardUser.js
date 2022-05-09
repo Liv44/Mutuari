@@ -1,32 +1,46 @@
-import { Box, Flex, Heading, VStack, Image } from "@chakra-ui/react";
+import { Box, Flex, Heading, VStack, Image, Button } from "@chakra-ui/react";
 import React from "react";
 import logoMutuari from "../logoMutuari.svg";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { TableCustom } from "../components/utils/TableCustom";
 import { Form } from "../components/dashboardUser/Form";
+import { ButtonDeconnexion } from "../components/utils/ButtonDeconnexion";
 
 export const DashboardUser = () => {
   const [materials, setMaterials] = useState([]);
   const [materialsnotvalidated, setMaterialsnotvalidated] = useState([]);
   const [materialsrefused, setMaterialsrefused] = useState([]);
+  const [user, setUser] = useState("");
   useEffect(() => {
-    axios.get("/users/3/borrow/validated").then((res) => {
-      setMaterials(res.data);
-    });
-    axios.get("/users/3/borrow/tovalidate").then((res) => {
-      setMaterialsnotvalidated(res.data);
-    });
-    axios.get("users/3/borrow/refused").then((res) => {
-      setMaterialsrefused(res.data);
+    axios.get("/authentification").then((res) => {
+      if (res.data.auth === false) {
+        window.location.href = "/";
+      } else if (res.data.auth && res.data.isAdmin === false) {
+        setUser(res.data.userName);
+        axios.get("/users/3/borrow/validated").then((res) => {
+          setMaterials(res.data);
+        });
+        axios.get("/users/3/borrow/tovalidate").then((res) => {
+          setMaterialsnotvalidated(res.data);
+        });
+        axios.get("users/3/borrow/refused").then((res) => {
+          setMaterialsrefused(res.data);
+        });
+      } else if (res.data.auth && res.data.isAdmin) {
+        window.location.href = "/admin";
+      }
     });
   }, [materialsnotvalidated, materials]);
+
   return (
     <Box mb={5} p={5}>
       <Box boxSize="sm" height="100%">
         <Image src={logoMutuari}></Image>
       </Box>
       <Heading mb={5}>Dashboard User</Heading>
+      <p>Connected as : {user}</p>
+      <ButtonDeconnexion />
       <Flex alignItems="flex-start" justify="space-around">
         <VStack>
           <TableCustom

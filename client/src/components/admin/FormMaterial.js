@@ -19,7 +19,6 @@ export const FormMaterial = () => {
     axios
       .post("/newmaterial", { name: name, description: description })
       .then((res) => {
-        console.log(res);
         if (res.data.added) {
           alert("Material added successfully");
           setName("");

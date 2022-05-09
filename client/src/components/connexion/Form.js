@@ -25,9 +25,9 @@ export const Form = () => {
 
     axios.post("/login", { email: email, password: password }).then((res) => {
       if (res.data.connected === true) {
-        if (res.data.isAdmin) {
-          window.location.href = "/admin";
-        } else {
+        if (res.data.result.isAdmin === 1) {
+          window.location.href = "/admin/materials";
+        } else if (res.data.result.isAdmin === 0) {
           window.location.href = "/user";
         }
       } else {

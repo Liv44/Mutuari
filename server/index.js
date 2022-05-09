@@ -1,6 +1,7 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 var bcrypt = require("bcryptjs");
+const session = require("express-session");
 
 const dbname = "database.db";
 //Ouvertue de la base de données
@@ -24,10 +25,39 @@ db.serialize(() => {
 
 const app = express();
 app.use(express.json());
+app.use(
+  session({
+    key: "userID",
+    secret: "secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    },
+  })
+);
 
 const PORT = process.env.PORT || 3001;
 app.get("/api", (req, res) => {
   res.json({ message: "Hello World!" });
+});
+
+app.get("/authentification", function (req, res) {
+  if (req.session.user === undefined) {
+    res.send({ auth: false });
+  } else if (req.session.user.isAdmin === 1) {
+    res.send({
+      auth: true,
+      isAdmin: true,
+      userName: req.session.user.firstname + " " + req.session.user.lastname,
+    });
+  } else if (req.session.user.isAdmin === 0) {
+    res.send({
+      auth: true,
+      isAdmin: false,
+      userName: req.session.user.firstname + " " + req.session.user.lastname,
+    });
+  }
 });
 
 app.get("/users", function (req, res) {
@@ -164,24 +194,29 @@ app.get("/users/:id", function (req, res) {
 
 //Sélection de tous les emprunts non validés d'un utilisateur
 app.get("/users/:id/borrow/:state", function (req, res) {
-  let query = "";
-  switch (req.params.state) {
-    case "tovalidate":
-      query =
-        "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE user.id = ? AND borrow.isValidated = false AND borrow.isRefused=false";
-      break;
-    case "refused":
-      query =
-        "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE user.id = ? AND borrow.isRefused = true";
-      break;
-    case "validated":
-      query =
-        "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE user.id = ? AND borrow.isValidated = true";
+  if (req.session.user === undefined) {
+    res.send("Veuillez vous connecter");
+  } else {
+    const userID = req.session.user.id;
+    let query = "";
+    switch (req.params.state) {
+      case "tovalidate":
+        query =
+          "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE user.id = ? AND borrow.isValidated = false AND borrow.isRefused=false";
+        break;
+      case "refused":
+        query =
+          "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE user.id = ? AND borrow.isRefused = true";
+        break;
+      case "validated":
+        query =
+          "SELECT material.name, user.firstname, user.lastname, borrow.startDate, borrow.endDate, borrow.isValidated FROM borrow INNER JOIN material ON material.id = borrow.materialID INNER JOIN user ON user.id = borrow.userID WHERE user.id = ? AND borrow.isValidated = true";
+    }
+    db.all(query, userID, function (err, result) {
+      if (err) throw err;
+      res.send(result);
+    });
   }
-  db.all(query, req.params.id, function (err, result) {
-    if (err) throw err;
-    res.send(result);
-  });
 });
 
 //
@@ -217,46 +252,51 @@ app.get("/materials/:id/borrow/:startdate/:enddate", function (req, res) {
 });
 
 app.post("/newborrow", function (req, res) {
-  const { materialID, userID, startDate, endDate } = req.body;
-  db.all(
-    "SELECT materialID, startDate, endDate FROM borrow WHERE materialID = ?",
-    materialID,
-    function (err, result) {
-      if (err) throw err;
-      let disponibility = true;
-      for (let i = 0; i < result.length; i++) {
-        const startDateReq = new Date(startDate);
-        const endDateReq = new Date(endDate);
-        const startDateMat = new Date(result[i].startDate);
-        const endDateMat = new Date(result[i].endDate);
-        if (startDateMat < startDateReq && endDateMat >= startDateReq) {
-          disponibility = false;
-          break;
-        } else if (startDateMat <= endDateReq && endDateMat > endDateReq) {
-          disponibility = false;
-          break;
-        } else if (startDateMat <= startDateReq && endDateMat >= endDateReq) {
-          disponibility = false;
-          break;
-        } else if (startDateMat >= startDateReq && endDateMat <= endDateReq) {
-          disponibility = false;
-          break;
+  if (req.session.user === undefined) {
+    res.send("Veuillez vous connecter");
+  } else {
+    const { materialID, userID, startDate, endDate } = req.body;
+    const userIDFound = req.session.user[0].id;
+    db.all(
+      "SELECT materialID, startDate, endDate FROM borrow WHERE materialID = ?",
+      materialID,
+      function (err, result) {
+        if (err) throw err;
+        let disponibility = true;
+        for (let i = 0; i < result.length; i++) {
+          const startDateReq = new Date(startDate);
+          const endDateReq = new Date(endDate);
+          const startDateMat = new Date(result[i].startDate);
+          const endDateMat = new Date(result[i].endDate);
+          if (startDateMat < startDateReq && endDateMat >= startDateReq) {
+            disponibility = false;
+            break;
+          } else if (startDateMat <= endDateReq && endDateMat > endDateReq) {
+            disponibility = false;
+            break;
+          } else if (startDateMat <= startDateReq && endDateMat >= endDateReq) {
+            disponibility = false;
+            break;
+          } else if (startDateMat >= startDateReq && endDateMat <= endDateReq) {
+            disponibility = false;
+            break;
+          }
+        }
+        if (disponibility) {
+          db.run(
+            "INSERT INTO borrow(materialID, userID, startDate, endDate) VALUES (?, ?, ?, ?)",
+            [materialID, userIDFound, startDate, endDate],
+            function (err, result) {
+              if (err) throw err;
+              res.send({ added: true, result: result });
+            }
+          );
+        } else {
+          res.send({ added: disponibility });
         }
       }
-      if (disponibility) {
-        db.run(
-          "INSERT INTO borrow(materialID, userID, startDate, endDate) VALUES (?, ?, ?, ?)",
-          [materialID, userID, startDate, endDate],
-          function (err, result) {
-            if (err) throw err;
-            res.send({ added: true, result: result });
-          }
-        );
-      } else {
-        res.send({ added: disponibility });
-      }
-    }
-  );
+    );
+  }
 });
 //Ajouter un nouvel utilisateur
 app.post("/adduser", function (req, res) {
@@ -303,33 +343,34 @@ app.post("/login", function (req, res) {
     res.send({ connected: false, err: "User not found" });
   } else {
     //Vérification de l'email
-    db.all(
-      "SELECT email, passwordhashed, isAdmin FROM user WHERE email=?",
-      email,
-      function (err, result) {
-        if (err) throw err;
-        if (result.length > 0) {
-          const isAdmin = result[0].isAdmin;
+    db.all("SELECT * FROM user WHERE email=?", email, function (err, result) {
+      if (err) throw err;
+      if (result.length > 0) {
+        const isAdmin = result[0].isAdmin;
 
-          //Vérification du mot de passe
-          bcrypt.compare(
-            password,
-            result[0].passwordhashed,
-            function (err, result) {
-              if (err) throw err;
-              if (result === true) {
-                res.send({ connected: true, isAdmin: isAdmin });
-              } else {
-                res.send({ connected: false, err: "password" });
-              }
+        //Vérification du mot de passe
+        bcrypt.compare(
+          password,
+          result[0].passwordhashed,
+          function (err, result2) {
+            if (err) throw err;
+            if (result2 === true) {
+              req.session.user = result[0];
+              res.json({ connected: true, result: result[0] });
+            } else {
+              res.send({ connected: false, err: "password" });
             }
-          );
-        } else {
-          res.send({ connected: false, err: "user" });
-        }
+          }
+        );
+      } else {
+        res.send({ connected: false, err: "user" });
       }
-    );
+    });
   }
+});
+app.get("/logout", (req, res) => {
+  req.session.user = undefined;
+  res.send("disconnected");
 });
 
 app.listen(PORT, () => {
