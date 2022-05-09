@@ -1,6 +1,8 @@
 const express = require("express");
+const axios = require("axios");
 const sqlite3 = require("sqlite3").verbose();
 var bcrypt = require("bcryptjs");
+require("./src/socket_communication");
 const session = require("express-session");
 
 const dbname = "database.db";
@@ -380,10 +382,102 @@ app.get("/logout", (req, res) => {
   res.send("disconnected");
 });
 
-app.listen(PORT, () => {
-  console.log(`Server listening on ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`Server listening on ${PORT}`);
+// });
 // db.close((err) => {
 //   if (err) throw err;
 //   console.log("Database closed");
 // });
+
+app.get("/users", function (req, res) {
+  let query = "SELECT id, firstname, lastname FROM user"
+  db.all(query, function (err, result) {
+    if (err) throw err;
+    res.send(result);
+  });
+});
+
+app.get("/borrow/materialname", function (req, res) {
+  let query = "SELECT *, material.name as materialName FROM borrow INNER JOIN material ON material.id = borrow.materialID AND borrow.isValidated = true";
+  db.all(query, function (err, result) {
+    if (err) throw err;
+    res.send(result);
+  });
+})
+
+app.get("/borrows/:userid", function (req, res) {
+  let query = "SELECT * FROM borrow WHERE userID = ? AND isValidated = true";
+  db.all(query, req.params.userid, function (err, result) {
+    if (err) throw err;
+    res.send(result);
+  });
+})
+
+app.post("/signatureborrow", function (req, res) {
+  const {userID, borrow, signature} = req.body;
+
+  const query = "UPDATE borrow SET isBorrowed = ?, isReturned = ? WHERE id = ?";
+
+  db.run(
+    query,
+    [borrow.isBorrowed, borrow.isReturned, borrow.id]
+  );
+})
+
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+
+
+const temporaryData = [
+    {
+        userID: 0,
+        firstName: "John", 
+        lastName: "Bibi", 
+        borrowsList: [
+            {borrowID: 0, materialName: "Appareil photo Nikon", isBorrowed: false, isReturned: false},
+            {borrowID: 1, materialName: "Caméra Sony", isBorrowed: true, isReturned: false},
+            {borrowID: 2, materialName: "Trépied", isBorrowed: true, isReturned: false},
+        ] 
+    },
+    {
+        userID: 1,
+        firstName: "Béatrice", 
+        lastName: "Sicle", 
+        borrowsList: [
+            {borrowID: 3, materialName: "Appareil photo Sony", isBorrowed: true, isReturned: false},
+            {borrowID: 4, materialName: "Microphone Bird UM1", isBorrowed: false, isReturned: false},
+            {borrowID: 5, materialName: "Perche", isBorrowed: false, isReturned: false},
+        ] 
+    },
+]
+
+const getData = async () => {
+
+  let users = await axios({method: 'GET', url: "http://localhost:3001/users", json: true})
+
+  let borrows = await axios({method: 'GET', url: "http://localhost:3001/borrow/materialname", json:true})
+
+  return {users: users.data, borrows: borrows.data};
+}
+
+io.on('connection', async (client) => { 
+    io.emit('connected');
+    console.log(`Connecté au client ${client.id}`)
+
+    client.emit("data", (await getData())); //Envoyer le tableau de données.
+
+    //récupération des données de la signature du client
+    client.on("getDataFromClient", (data) => {
+        console.log("l'id de l'utilisateur est : ", data.userID)
+        axios.post("http://localhost:3001/signatureborrow", { userID: data.userID, borrow: data.borrow, signarture: data.signature })
+    })
+
+    client.on('disconnect', () => {
+        console.log(`Le client ${client.id} est déconnecté`);
+    });
+});
+
+server.listen(3001, () => {
+    console.log("Serveur en écoute sur le port 3001");
+});
