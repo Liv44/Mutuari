@@ -19,7 +19,7 @@
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
-  "proxy": "http:/141.95.166.131:8055",
+  "proxy": "http://141.95.166.131:8055",
   "scripts": {
     "start": "PORT=8005 react-scripts start",
     "build": "react-scripts build",
